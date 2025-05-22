@@ -1,0 +1,37 @@
+defaults:
+  - default
+
+hydra:
+  run:
+    dir: outputs/${now:%Y-%m-%d}/traffic/${now:%H-%M-%S}
+  sweep:
+    dir: multirun/${now:%Y-%m-%d}/traffic/${now:%H-%M-%S}
+
+# Data loader
+model_id: traffic
+data: "custom"
+root_path: "./dataset/traffic"
+data_path: "traffic.csv"
+
+# Forecasting task
+seq_len: 512
+pred_len: 96
+
+# Model definition
+num_total_nvars: 862
+
+# Optimization
+train_epochs: 25
+learning_rate: 0.005 
+batch_size: 64
+patience: 6
+nvars_val: 40
+nvars_training: 30
+
+# Total architucture
+patch_len: 16
+dim: 128
+ffn_multiplier: 3.0
+proj_expend_ratio: 1
+proj_squeeze_ratio: 10
+dropout: 0.3

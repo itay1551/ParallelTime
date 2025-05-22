@@ -1,0 +1,35 @@
+defaults:
+  - default
+
+hydra:
+  run:
+    dir: outputs/${now:%Y-%m-%d}/weather/${now:%H-%M-%S}
+  sweep:
+    dir: multirun/${now:%Y-%m-%d}/weather/${now:%H-%M-%S}
+
+# Data loader
+model_id: weather
+data: "custom"
+root_path: "./dataset/weather"
+data_path: "weather.csv"
+
+# Forecasting task
+seq_len: 512
+pred_len: 96
+
+# Model definition
+num_total_nvars: 21
+
+# Optimization
+train_epochs: 25
+learning_rate: 0.0004
+batch_size: 64
+patience: 8
+
+# Total architucture
+patch_len: 16
+dim: 16
+ffn_multiplier: 3.0
+proj_expend_ratio: 16
+proj_squeeze_ratio: 1
+dropout: 0.25

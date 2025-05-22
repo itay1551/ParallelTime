@@ -1,0 +1,35 @@
+defaults:
+  - default
+
+hydra:
+  run:
+    dir: outputs/${now:%Y-%m-%d}/ETTh1/${now:%H-%M-%S}
+  sweep:
+    dir: multirun/${now:%Y-%m-%d}/ETTh1/${now:%H-%M-%S}
+
+# Data loader
+model_id: ETTh1
+data: "ETTh1"
+root_path: "./dataset/ETT-small/"
+data_path: "ETTh1.csv"
+
+# Forecasting task
+seq_len: 512
+pred_len: 96
+
+# Model definition
+num_total_nvars: 7
+
+# Optimization
+train_epochs: 20
+learning_rate: 0.0008
+batch_size: 256
+patience: 4
+
+# Total architucture
+patch_len: 16
+dim: 16
+ffn_multiplier: 4.0
+proj_expend_ratio: 12
+proj_squeeze_ratio: 1
+dropout: 0.20

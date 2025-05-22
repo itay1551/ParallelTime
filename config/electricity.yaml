@@ -1,0 +1,38 @@
+defaults:
+  - default
+
+hydra:
+  run:
+    dir: outputs/${now:%Y-%m-%d}/electricity/${now:%H-%M-%S}
+  sweep:
+    dir: multirun/${now:%Y-%m-%d}/electricity/${now:%H-%M-%S}
+
+
+# Data loader
+model_id: electricity
+data: "custom"
+root_path: "./dataset/electricity/"
+data_path: "electricity.csv"
+
+# Forecasting task
+seq_len: 512
+pred_len: 96
+
+# Model definition
+num_total_nvars: 321
+
+# Optimization
+train_epochs: 20
+learning_rate: 0.005
+batch_size: 64
+patience: 6
+nvars_val: 40
+nvars_training: 30
+
+# Total architucture
+patch_len: 16
+dim: 128
+ffn_multiplier: 2.0
+proj_expend_ratio: 1
+proj_squeeze_ratio: 10
+dropout: 0.20
