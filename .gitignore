@@ -138,3 +138,5 @@ dmypy.json
 /results
 /test_results
 /test_results_1
+
+uv.lock
