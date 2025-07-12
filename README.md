@@ -36,7 +36,7 @@ You can do it by downloading it from this [Autoformer](https://drive.google.com/
 ```
 
 
-2. Install requirements. `pip uv` followed by `uv sync` which will install all the project dependencies (dont forget to change the source to .venv).
+2. Install requirements. `pip install uv` followed by `uv sync` which will install all the project dependencies (dont forget to change the source to .venv).
 
 3. Look through our scripts located at ```./scripts``` which run 4 runs for diffrent prediction length depend on the dataset. You'll find the core of ParallelTime in ```models/ParallelTime.py```. For example, to get the multivariate forecasting results for ETTh1 dataset, just run the following command `sh ./scripts/etth1.sh`
 
