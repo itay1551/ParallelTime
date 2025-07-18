@@ -3,7 +3,7 @@
 ### Welcome to the official repository of: ParallelTime: Dynamically Weighting the Balance of Short- and Long-Term Temporal Dependencies. 
 ### The architecture of ParallelTime. 
 
-<img src="figures/model-architucture.drawio.png" alt="ParallelTime Architucture" width="100%">
+<img src="figures/model-architucture.png" alt="ParallelTime Architucture" width="100%">
 
 ### Our main contributions:
 * ParallelTime selects the contributions of short-term, long-term, and global memory for each time series patch.
