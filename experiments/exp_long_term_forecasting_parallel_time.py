@@ -15,12 +15,13 @@ from experiments.exp_basic import Exp_Basic
 from utils.metrics import metric
 from utils.tools import EarlyStopping, adjust_learning_rate, visual
 
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
 
 
 logger = logging.getLogger(__name__)
 
 FAST_TRANING_LOW_METRICS = True
+
 
 class Exp_Long_Term_Forecast(Exp_Basic):
     def __init__(self, args):
@@ -48,12 +49,12 @@ class Exp_Long_Term_Forecast(Exp_Basic):
 
     def _select_criterion(self, loss):
         loss = loss.lower()
-        if loss == 'mse':
+        if loss == "mse":
             criterion = nn.MSELoss()
-        elif loss == 'huber':
-            criterion = nn.HuberLoss(reduction='mean', delta=self.args.huber_delta)
+        elif loss == "huber":
+            criterion = nn.HuberLoss(reduction="mean", delta=self.args.huber_delta)
         else:
-            raise ValueError('wrong loss type')
+            raise ValueError("wrong loss type")
         return criterion
 
     def vali(self, vali_data, vali_loader, criterion):
@@ -67,11 +68,11 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 if self.val_partial_idx is not None:
                     batch_x = batch_x[:, :, self.val_partial_idx]
                     batch_y = batch_y[:, :, self.val_partial_idx]
-                
+
                 outputs = self.model(batch_x)
-                f_dim = -1 if self.args.features == 'MS' else 0
-                outputs = outputs[:, -self.args.pred_len:, f_dim:]
-                batch_y = batch_y[:, -self.args.pred_len:, f_dim:].to(self.device)
+                f_dim = -1 if self.args.features == "MS" else 0
+                outputs = outputs[:, -self.args.pred_len :, f_dim:]
+                batch_y = batch_y[:, -self.args.pred_len :, f_dim:].to(self.device)
 
                 pred = outputs.detach().cpu()
                 true = batch_y.detach().cpu()
@@ -84,8 +85,8 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         return total_loss
 
     def train(self, setting):
-        train_data, train_loader = self._get_data(flag='train')
-        vali_data, vali_loader = self._get_data(flag='val')
+        train_data, train_loader = self._get_data(flag="train")
+        vali_data, vali_loader = self._get_data(flag="val")
 
         path = os.path.join(self.args.checkpoints, setting)
         if not os.path.exists(path):
@@ -97,11 +98,13 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         train_steps = len(train_loader)
         early_stopping = EarlyStopping(patience=self.args.patience, verbose=True)
         model_optim = self._select_optimizer()
-        scheduler = lr_scheduler.OneCycleLR(optimizer = model_optim,
-                                            steps_per_epoch = train_steps,
-                                            pct_start = self.args.pct_start,
-                                            epochs = self.args.train_epochs,
-                                            max_lr = self.args.learning_rate)
+        scheduler = lr_scheduler.OneCycleLR(
+            optimizer=model_optim,
+            steps_per_epoch=train_steps,
+            pct_start=self.args.pct_start,
+            epochs=self.args.train_epochs,
+            max_lr=self.args.learning_rate,
+        )
         criterion = self._select_criterion(self.args.loss)
 
         for epoch in range(self.args.train_epochs):
@@ -122,56 +125,70 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                     index = np.stack(random.sample(range(N), self.args.nvars_training))
                     batch_x = batch_x[:, :, index]
                     batch_y = batch_y[:, :, index]
-                
+
                 outputs = self.model(batch_x)
 
-                f_dim = -1 if self.args.features == 'MS' else 0
-                outputs = outputs[:, -self.args.pred_len:, f_dim:]
-                batch_y = batch_y[:, -self.args.pred_len:, f_dim:].to(self.device)
+                f_dim = -1 if self.args.features == "MS" else 0
+                outputs = outputs[:, -self.args.pred_len :, f_dim:]
+                batch_y = batch_y[:, -self.args.pred_len :, f_dim:].to(self.device)
                 loss = criterion(outputs, batch_y)
                 train_loss.append(loss.item())
 
                 if (i + 1) % 100 == 0:
-                    logger.info(f'\titers: {i + 1}, epoch: {epoch + 1} | loss: {loss.item():.7f}')
+                    logger.info(
+                        f"\titers: {i + 1}, epoch: {epoch + 1} | loss: {loss.item():.7f}"
+                    )
                     speed = (time.time() - time_now) / iter_count
-                    left_time = speed * ((self.args.train_epochs - epoch) * train_steps - i)
-                    logger.info(f'\tspeed: {speed:.4f}s/iter; left time: {left_time:.4f}s')
+                    left_time = speed * (
+                        (self.args.train_epochs - epoch) * train_steps - i
+                    )
+                    logger.info(
+                        f"\tspeed: {speed:.4f}s/iter; left time: {left_time:.4f}s"
+                    )
                     iter_count = 0
                     time_now = time.time()
 
                 loss.backward()
                 model_optim.step()
-                
-                if self.args.lradj == 'OneCycleLR':
-                    adjust_learning_rate(model_optim, scheduler=scheduler, epoch=epoch + 1, args=self.args)
+
+                if self.args.lradj == "OneCycleLR":
+                    adjust_learning_rate(
+                        model_optim,
+                        scheduler=scheduler,
+                        epoch=epoch + 1,
+                        args=self.args,
+                    )
                     scheduler.step()
 
             if epoch == self.args.train_epochs - 1:
                 continue
 
-            if self.args.lradj != 'OneCycleLR':
+            if self.args.lradj != "OneCycleLR":
                 adjust_learning_rate(model_optim, epoch=epoch + 1, args=self.args)
-            logger.info(f'Epoch: {epoch + 1} cost time: {time.time() - epoch_time}')
+            logger.info(f"Epoch: {epoch + 1} cost time: {time.time() - epoch_time}")
             train_loss = np.average(train_loss)
             vali_loss = self.vali(vali_data, vali_loader, criterion)
 
             early_stopping(vali_loss, self.model, path)
             if early_stopping.early_stop:
-                logger.info('Early stopping')
+                logger.info("Early stopping")
                 break
-            logger.info(f'Epoch: {epoch + 1}, Steps: {train_steps} | Train Loss: {train_loss:.7f} Vali Loss: {vali_loss:.7f}')
+            logger.info(
+                f"Epoch: {epoch + 1}, Steps: {train_steps} | Train Loss: {train_loss:.7f} Vali Loss: {vali_loss:.7f}"
+            )
 
         return self.model
 
-
     def test(self, setting, test=0):
-        test_data, test_loader = self._get_data(flag='test')
+        test_data, test_loader = self._get_data(flag="test")
         if test:
-            logger.info('Loading model...')
-            self.model.load_state_dict(torch.load(os.path.join('./checkpoints/' + setting, 'checkpoint.pth'))) 
+            logger.info("Loading model...")
+            self.model.load_state_dict(
+                torch.load(os.path.join("./checkpoints/" + setting, "checkpoint.pth"))
+            )
 
-        folder_path = f'./test_results/{setting}/'
-        weights_folder = f'./test_results/{setting}/weights/'  # Folder for weights
+        folder_path = f"./test_results/{setting}/"
+        weights_folder = f"./test_results/{setting}/weights/"  # Folder for weights
         os.makedirs(folder_path, exist_ok=True)
         os.makedirs(weights_folder, exist_ok=True)  # Create weights subfolder
 
@@ -188,12 +205,14 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 outputs, weights_by_layer_list = self.model(batch_x, True)
 
                 # Save weights_by_layer_list for this batch
-                weights_file = os.path.join(weights_folder, f'weights_batch_{i}.pt')
-                torch.save([w.detach().cpu() for w in weights_by_layer_list], weights_file)
+                weights_file = os.path.join(weights_folder, f"weights_batch_{i}.pt")
+                torch.save(
+                    [w.detach().cpu() for w in weights_by_layer_list], weights_file
+                )
 
-                f_dim = -1 if self.args.features == 'MS' else 0
-                outputs = outputs[:, -self.args.pred_len:, f_dim:]
-                batch_y = batch_y[:, -self.args.pred_len:, f_dim:].to(self.device)
+                f_dim = -1 if self.args.features == "MS" else 0
+                outputs = outputs[:, -self.args.pred_len :, f_dim:]
+                batch_y = batch_y[:, -self.args.pred_len :, f_dim:].to(self.device)
 
                 # Convert to numpy
                 outputs = outputs.detach().cpu().numpy()
@@ -202,8 +221,12 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 # Inverse transform if necessary
                 if test_data.scale and self.args.inverse:
                     shape = outputs.shape
-                    outputs = test_data.inverse_transform(outputs.squeeze(0)).reshape(shape)
-                    batch_y = test_data.inverse_transform(batch_y.squeeze(0)).reshape(shape)
+                    outputs = test_data.inverse_transform(outputs.squeeze(0)).reshape(
+                        shape
+                    )
+                    batch_y = test_data.inverse_transform(batch_y.squeeze(0)).reshape(
+                        shape
+                    )
 
                 # Calculate metrics for current batch
                 mae, mse, rmse, mape, mspe = metric(outputs, batch_y)
@@ -219,13 +242,29 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                     input_data = batch_x.detach().cpu().numpy()
                     if test_data.scale and self.args.inverse:
                         shape = input_data.shape
-                        input_data = test_data.inverse_transform(input_data.squeeze(0)).reshape(shape)
+                        input_data = test_data.inverse_transform(
+                            input_data.squeeze(0)
+                        ).reshape(shape)
                     for j in range(7):
-                        gt = np.concatenate((input_data[0, :, j], batch_y[0, :, j]), axis=0)
-                        pd = np.concatenate((input_data[0, :, j], outputs[0, :, j]), axis=0)
-                        visual(gt, pd, os.path.join(folder_path, f'{i}_{j}.pdf'), batch_x.shape[-2])
-                        weights_file = os.path.join(folder_path, 'weights', f'weights_batch_{i}_{j}.pt')
-                        torch.save([w.detach().cpu()[0 + j] for w in weights_by_layer_list], weights_file)
+                        gt = np.concatenate(
+                            (input_data[0, :, j], batch_y[0, :, j]), axis=0
+                        )
+                        pd = np.concatenate(
+                            (input_data[0, :, j], outputs[0, :, j]), axis=0
+                        )
+                        visual(
+                            gt,
+                            pd,
+                            os.path.join(folder_path, f"{i}_{j}.pdf"),
+                            batch_x.shape[-2],
+                        )
+                        weights_file = os.path.join(
+                            folder_path, "weights", f"weights_batch_{i}_{j}.pt"
+                        )
+                        torch.save(
+                            [w.detach().cpu()[0 + j] for w in weights_by_layer_list],
+                            weights_file,
+                        )
                         del gt, pd
 
         # Compute final averaged metrics
@@ -235,27 +274,29 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         avg_mape = total_mape / count
         avg_mspe = total_mspe / count
 
-        logger.info(f'mse:{avg_mse}, mae:{avg_mae}')
+        logger.info(f"mse:{avg_mse}, mae:{avg_mae}")
 
         # Save final results
         # with open(f'result_long_term_forecast_{self.args.comment}.txt', 'a') as f:
-        with open(f'result_long_term_forecast_{self.args.model_id}.txt', 'a') as f:
-            f.write(f'{setting}\n')
-            f.write(f'mse: {avg_mse}, mae: {avg_mae}\n\n')
+        with open(f"result_long_term_forecast_{self.args.model_id}.txt", "a") as f:
+            f.write(f"{setting}\n")
+            f.write(f"mse: {avg_mse}, mae: {avg_mae}\n\n")
 
-        results_folder = f'./results/{setting}/'
+        results_folder = f"./results/{setting}/"
         os.makedirs(results_folder, exist_ok=True)
-        np.save(os.path.join(results_folder, 'final_metrics.npy'), np.array([avg_mae, avg_mse, avg_rmse, avg_mape, avg_mspe]))
+        np.save(
+            os.path.join(results_folder, "final_metrics.npy"),
+            np.array([avg_mae, avg_mse, avg_rmse, avg_mape, avg_mspe]),
+        )
 
         return
-    
-    
+
     def predict(self, setting, load=False):
-        pred_data, pred_loader = self._get_data(flag='pred')
+        pred_data, pred_loader = self._get_data(flag="pred")
 
         if load:
             path = os.path.join(self.args.checkpoints, setting)
-            best_model_path = path + '/' + 'checkpoint.pth'
+            best_model_path = path + "/" + "checkpoint.pth"
             self.model.load_state_dict(torch.load(best_model_path))
 
         preds = []
@@ -270,7 +311,9 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 outputs = outputs.detach().cpu().numpy()
                 if pred_data.scale and self.args.inverse:
                     shape = outputs.shape
-                    outputs = pred_data.inverse_transform(outputs.squeeze(0)).reshape(shape)
+                    outputs = pred_data.inverse_transform(outputs.squeeze(0)).reshape(
+                        shape
+                    )
                 preds.append(outputs)
 
         preds = np.array(preds)

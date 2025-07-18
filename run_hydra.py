@@ -5,15 +5,16 @@ import hydra
 import numpy as np
 import torch
 
-from experiments.exp_long_term_forecasting_parallel_time import \
-    Exp_Long_Term_Forecast
+from experiments.exp_long_term_forecasting_parallel_time import Exp_Long_Term_Forecast
 
 logger = logging.getLogger(__name__)
+
 
 def set_seed(fix_seed: int):
     random.seed(fix_seed)
     torch.manual_seed(fix_seed)
     np.random.seed(fix_seed)
+
 
 @hydra.main(version_base=None, config_path="config", config_name="default")
 def main(cfg: dict):
@@ -21,11 +22,11 @@ def main(cfg: dict):
     set_seed(cfg.fix_seed)
 
     cfg.use_gpu = True if torch.cuda.is_available() and cfg.use_gpu else False
-    cfg.comment = '_' + cfg.comment if cfg.comment != '' else ''
-    
+    cfg.comment = "_" + cfg.comment if cfg.comment != "" else ""
+
     if cfg.use_gpu and cfg.get("use_multi_gpu", False):
         # Process GPU device ids if needed
-        cfg.device_ids = [int(x) for x in cfg.devices.replace(' ', '').split(',')]
+        cfg.device_ids = [int(x) for x in cfg.devices.replace(" ", "").split(",")]
         cfg.gpu = cfg.device_ids[0]
 
     # For each experiment iteration (you can loop over cfg.itr if needed)
@@ -43,21 +44,21 @@ def main(cfg: dict):
             f"seed{cfg.patch_len}_"
             f"nre{cfg.num_register_tokens}_"
             f"expr{cfg.expend_ratio_scaler}_"
-            f'batch_s{cfg.batch_size}_'
-            f'prj_ex{cfg.proj_expend_ratio}_'
-            f'prj_sq{cfg.proj_squeeze_ratio}_'
-            f'drop{cfg.dropout}_'
+            f"batch_s{cfg.batch_size}_"
+            f"prj_ex{cfg.proj_expend_ratio}_"
+            f"prj_sq{cfg.proj_squeeze_ratio}_"
+            f"drop{cfg.dropout}_"
             f"comm{cfg.comment}"
         )
         exp = Exp_Long_Term_Forecast(cfg)
-        logger.info(f'>>>>>>> start training: {setting} <<<<<<<<<<<<<<<<<<<<<<')
+        logger.info(f">>>>>>> start training: {setting} <<<<<<<<<<<<<<<<<<<<<<")
         exp.train(setting)
 
-        logger.info(f'>>>>>>> testing: {setting} <<<<<<<<<<<<<<<<<<<<<<')
+        logger.info(f">>>>>>> testing: {setting} <<<<<<<<<<<<<<<<<<<<<<")
         exp.test(setting)
 
         if cfg.get("do_predict", False):
-            logger.info(f'>>>>>>> predicting: {setting} <<<<<<<<<<<<<<<<<<<<<<')
+            logger.info(f">>>>>>> predicting: {setting} <<<<<<<<<<<<<<<<<<<<<<")
             exp.predict(setting, True)
 
         torch.cuda.empty_cache()

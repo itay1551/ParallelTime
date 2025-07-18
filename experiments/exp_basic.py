@@ -1,6 +1,5 @@
 import logging
 import os
-import sys
 
 import torch
 
@@ -8,21 +7,12 @@ from model import ParallelTime
 
 logger = logging.getLogger(__name__)
 
-# Define a custom exception handler
-def handle_exception(exc_type, exc_value, exc_traceback):
-    logger.error("Unhandled exception occurred", exc_info=(exc_type, exc_value, exc_traceback))
-    # Ensure logs are written immediately by flushing handlers
-    for handler in logger.handlers:
-        handler.flush()
-
-# Set the custom handler as the global exception hook
-sys.excepthook = handle_exception
 
 class Exp_Basic(object):
     def __init__(self, args):
         self.args = args
         self.model_dict = {
-            'ParallelTime': ParallelTime,
+            "ParallelTime": ParallelTime,
         }
         self.device = self._acquire_device()
         self.model = self._build_model().to(self.device)
@@ -36,13 +26,14 @@ class Exp_Basic(object):
 
     def _acquire_device(self):
         if self.args.use_gpu:
-            os.environ["CUDA_VISIBLE_DEVICES"] = str(
-                self.args.gpu) if not self.args.use_multi_gpu else self.args.devices
-            device = torch.device('cuda:{}'.format(self.args.gpu))
-            logger.info('Use GPU: cuda:{}'.format(self.args.gpu))
+            os.environ["CUDA_VISIBLE_DEVICES"] = (
+                str(self.args.gpu) if not self.args.use_multi_gpu else self.args.devices
+            )
+            device = torch.device("cuda:{}".format(self.args.gpu))
+            logger.info("Use GPU: cuda:{}".format(self.args.gpu))
         else:
-            device = torch.device('cpu')
-            logger.info('Use CPU')
+            device = torch.device("cpu")
+            logger.info("Use CPU")
         return device
 
     def _get_data(self):
