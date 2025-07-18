@@ -42,14 +42,7 @@ You can do it by downloading it from this [Autoformer](https://drive.google.com/
 
 For the other datasets run on a Linux machine:
 ```
-sh ./scripts/electricity.sh
-sh ./scripts/etth2.sh
-sh ./scripts/ettm2.sh
-sh ./scripts/traffic.sh
-sh ./scripts/etth1.sh
-sh ./scripts/ettm1.sh
-sh ./scripts/illness.sh
-sh ./scripts/weather.sh
+sh ./scripts/<script_name>.sh
 ```
 After the run ends for each prediction length, you can open `./result_long_term_forecast_<dataset_name>.txt` to view the results once the model run is complete. Additionally, logs and configurations are saved for each run in ```./multirun/current_date/<dataset_name>/run_time```, which can be used to review more detailed results.
 
