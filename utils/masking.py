@@ -105,28 +105,6 @@ class TriangularCausalSubLastBothWaysMask():
         return self._mask
     
 
-class TriangularCausalSubLastBothWaysMask():
-    def __init__(self, N, M, device="cpu"):
-        with torch.no_grad():
-            mask = torch.ones(N, N, dtype=bool)
-            
-            j=M
-            for i in range(N):
-                mask[i:i+j, i] = False
-                j -= 1
-                if j == 0:
-                    j = M
-
-            for i in range(M, N + 1, M):
-                for j in range(M, N + 1, M):
-                    mask[j-1, i-1] = False
-            self._mask = mask.to(device)
-
-    @property
-    def mask(self):
-        return self._mask
-    
-
 class PatchPlusIMask():
     def __init__(self, N, M, device="cpu"):
         with torch.no_grad():

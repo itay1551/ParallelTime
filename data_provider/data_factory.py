@@ -1,7 +1,11 @@
-from data_provider.data_loader import Dataset_ETT_hour, Dataset_ETT_minute, Dataset_Custom, Dataset_Solar, Dataset_PEMS, Dataset_Pred
-from torch.utils.data import DataLoader
-import sys
 import logging
+import sys
+
+from torch.utils.data import DataLoader
+
+from data_provider.data_loader import (Dataset_Custom, Dataset_ETT_hour,
+                                       Dataset_ETT_minute, Dataset_PEMS,
+                                       Dataset_Pred, Dataset_Solar)
 
 logger = logging.getLogger(__name__)
 

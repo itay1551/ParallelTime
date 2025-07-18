@@ -1,8 +1,10 @@
-import os
-import torch
-from model import ParallelTime
-import sys
 import logging
+import os
+import sys
+
+import torch
+
+from model import ParallelTime
 
 logger = logging.getLogger(__name__)
 

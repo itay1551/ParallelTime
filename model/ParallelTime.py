@@ -1,13 +1,16 @@
+from dataclasses import dataclass, fields
+from math import log, sqrt
+from typing import Optional
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from utils.masking import WindowAttMaskWithRegister
-from math import sqrt, log
-from dataclasses import dataclass, fields
-from typing import Optional
+from einops import repeat
 from torch import Tensor
 from zeta.nn import MambaBlock
-from einops import repeat
+
+from utils.masking import WindowAttMaskWithRegister
+
 
 @dataclass
 class ModelArgs:

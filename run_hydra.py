@@ -1,9 +1,12 @@
+import logging
 import random
+
+import hydra
 import numpy as np
 import torch
-import hydra
-from experiments.exp_long_term_forecasting_parallel_time import Exp_Long_Term_Forecast
-import logging
+
+from experiments.exp_long_term_forecasting_parallel_time import \
+    Exp_Long_Term_Forecast
 
 logger = logging.getLogger(__name__)
 
