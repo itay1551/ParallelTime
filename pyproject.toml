@@ -1,7 +1,7 @@
 [project]
 name = "ParallelTime"
 version = "0.1.0"
-description = "Add your description here"
+description = "The official repository of ParallelTime: Dynamically Weighting the Balance of Short- and Long-Term Temporal Dependencies."
 readme = "README.md"
 requires-python = "==3.11.9"
 dependencies = [
@@ -12,4 +12,13 @@ dependencies = [
     "setuptools==72.1.0",
     "torch==2.4.0",
     "zetascale==2.7.3",
+]
+authors = [
+    { name = "Itay Katav", email = "katavit@post.bgu.ac.il" }
+]
+
+[dependency-groups]
+dev = [
+    "black>=25.1.0",
+    "isort>=6.0.1",
 ]
