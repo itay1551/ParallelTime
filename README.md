@@ -1,6 +1,6 @@
 # <center>ParallelTime</center>
 
-### Welcome to the official repository of: ParallelTime: Dynamically Weighting the Balance of Short- and Long-Term Temporal Dependencies. 
+### Welcome to the official repository of [ParallelTime: Dynamically Weighting the Balance of Short- and Long-Term Temporal Dependencies](https://www.arxiv.org/abs/2507.13998). 
 ### The architecture of ParallelTime. 
 
 <img src="figures/model-architucture.png" alt="ParallelTime Architucture" width="100%">
