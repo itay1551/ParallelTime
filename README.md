@@ -6,7 +6,7 @@
 <img src="figures/model-architucture.png" alt="ParallelTime Architucture" width="100%">
 
 ### Our main contributions:
-* ParallelTime selects the contributions of short-term, long-term, and global memory for each time series patch.
+* ParallelTime (Parallel Time) selects the contributions of short-term, long-term, and global memory for each time series patch.
 * We demonstrate that parallel Mamba-Attention architecture is currently the most effective
 approach for long-term time series forecasting.
 * Our model, ParallelTime, achieves SOTA performance on real-world benchmarks, delivering better results from previews models with fewer parameters and lower computational cost, critical for real-time forecasting.
@@ -14,7 +14,7 @@ approach for long-term time series forecasting.
 <img src="figures/results.png" alt="ParallelTime Architucture" width="100%">
 
 
-## Usage
+## Usage of Parallel Time
 
 1. Obtain the fundamental long-term forecasting datasets, including Weather, Illness, Traffic, Electricity, and ETT (comprising 4 datasets)
 You can do it by downloading it from this [Autoformer](https://drive.google.com/drive/folders/1ZOYpTUa82_jCcxIdTmyr0LXQfvaM9vIy), and move them into `dataset/` directory.
