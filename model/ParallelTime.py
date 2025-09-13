@@ -164,19 +164,45 @@ class ParallelTimeWeighter(nn.Module):
         else:
             return output_tensor.mean(dim=-1), None # -> (batch_size, num_patches, dim)
     
-class ParallelTimeDecoder(nn.Module):
-    def __init__(self, attention, d_model, ffn_multiplier=4., dropout=0.1, 
-                 activation="relu", d_state: int = 16, d_conv: int = 2, 
+class ParallelAttMamba(nn.Module):
+    def __init__(self, att_dropout: Optional[float], att_n_heads: int, d_model, 
+                 d_state: int = 16, d_conv: int = 2, 
                  expend_ratio_scaler: int = 16):
         super().__init__()
-        d_ff = int(d_model * ffn_multiplier)
         
-        self.attention = attention
+        self.attention = ParallelTimeAttentionLayer(
+                    FlashAttention(attention_dropout=att_dropout),d_model, att_n_heads)
         self.ssm = MambaBlock(d_model, depth=1, d_state=d_state,expand=1,d_conv=d_conv)
         self.weigther = ParallelTimeWeighter(2, dim=d_model, expend_ratio=expend_ratio_scaler)
 
         self.norm_ssm = RMSNorm(d_model)
         self.norm_att = RMSNorm(d_model)
+        
+    def forward(self, x: Tensor, registers: Optional[Tensor], attn_mask=None, return_weights=False):
+        # x: (-1, num_patches, dim)
+        
+        # Attention
+        x_att, _ = self.attention(
+            x, x, x,
+            registers=registers,
+            attn_mask=attn_mask,
+        )
+        # Mamba
+        x_ssm = self.ssm(x)
+
+        # ParallelTime Weigther
+        new_x, weights = self.weigther(self.norm_att(x_att), self.norm_ssm(x_ssm), return_weights)
+        
+        return new_x, weights
+
+class ParallelTimeDecoder(nn.Module):
+    def __init__(self, att_dropout: Optional[float], att_n_heads: int, d_model, ffn_multiplier=4., dropout=0.1, 
+                 d_state: int = 16, d_conv: int = 2, 
+                 expend_ratio_scaler: int = 16):
+        super().__init__()
+        d_ff = int(d_model * ffn_multiplier)
+        
+        self.parallel_att_mamba = ParallelAttMamba(att_dropout, att_n_heads, d_model, d_state, d_conv, expend_ratio_scaler)
         
         self.feed_forward = ParallelTimeFFN(d_model, d_ff)
         
@@ -184,23 +210,13 @@ class ParallelTimeDecoder(nn.Module):
         self.norm2 = nn.LayerNorm(d_model)
         self.dropout = nn.Dropout(dropout) if dropout else nn.Identity()
         self.dropout_ff = nn.Dropout(dropout) if dropout else nn.Identity()
-        self.activation = F.relu if activation == "relu" else F.gelu
 
     def forward(self, x: Tensor, registers: Optional[Tensor], attn_mask=None, return_weights=False):
         # x: (-1, num_patches, dim)
         x_norm = self.norm1(x)
         
-        # Attention
-        x_att, _ = self.attention(
-            x_norm, x_norm, x_norm,
-            registers=registers,
-            attn_mask=attn_mask,
-        )
-        # Mamba
-        x_ssm = self.ssm(x_norm)
-
         # ParallelTime Weigther
-        new_x, weights = self.weigther(self.norm_att(x_att), self.norm_ssm(x_ssm), return_weights)
+        new_x, weights = self.parallel_att_mamba(x_norm, registers, attn_mask, return_weights)
 
         x = x + self.dropout(new_x)
 
@@ -286,14 +302,11 @@ class Model(nn.Module):
         # Parallel time decoder layers
         self.decoder_layers = nn.ModuleList([
             ParallelTimeDecoder(
-                ParallelTimeAttentionLayer(
-                    FlashAttention(attention_dropout=params.att_dropout),
-                    params.dim, 
-                    n_heads),
+                att_dropout=params.att_dropout,
+                att_n_heads=n_heads,
                 d_model=params.dim,
                 ffn_multiplier=params.ffn_multiplier,
                 dropout=params.dropout,
-                activation='gelu',
                 d_state=params.d_state,
                 d_conv=params.d_conv,
                 expend_ratio_scaler=params.expend_ratio_scaler,
