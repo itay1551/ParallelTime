@@ -28,6 +28,7 @@ embed: "timeF"
 activation: "gelu"
 output_attention: false
 do_predict: false
+model_number: "1234567890" # by default using a random uuid
 
 # Optimization
 num_workers: 10

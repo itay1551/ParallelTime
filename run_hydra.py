@@ -1,5 +1,6 @@
 import logging
 import random
+import uuid
 
 import hydra
 import numpy as np
@@ -29,37 +30,20 @@ def main(cfg: dict):
         cfg.device_ids = [int(x) for x in cfg.devices.replace(" ", "").split(",")]
         cfg.gpu = cfg.device_ids[0]
 
+    cfg.model_number = str(uuid.uuid4())
+
     # For each experiment iteration (you can loop over cfg.itr if needed)
     for ii in range(cfg.itr if "itr" in cfg else 1):
-        setting = (
-            f"{cfg.model}_"
-            f"{cfg.model_id.split('_')[0]}_"
-            f"sl{cfg.seq_len}_"
-            f"pl{cfg.pred_len}_"
-            f"dm{cfg.dim}_"
-            f"nblayers{cfg.n_block_layers}_"
-            f"psize{cfg.patch_len}_"
-            f"pwin{cfg.patches_window_len}_"
-            f"numepo{cfg.train_epochs}_"
-            f"seed{cfg.patch_len}_"
-            f"nre{cfg.num_register_tokens}_"
-            f"expr{cfg.expend_ratio_scaler}_"
-            f"batch_s{cfg.batch_size}_"
-            f"prj_ex{cfg.proj_expend_ratio}_"
-            f"prj_sq{cfg.proj_squeeze_ratio}_"
-            f"drop{cfg.dropout}_"
-            f"comm{cfg.comment}"
-        )
         exp = Exp_Long_Term_Forecast(cfg)
-        logger.info(f">>>>>>> start training: {setting} <<<<<<<<<<<<<<<<<<<<<<")
-        exp.train(setting)
+        logger.info(f">>>>>>> start training: {cfg.model_id}, {cfg.pred_len} <<<<<<<<<<<<<<<<<<<<<<")
+        exp.train()
 
-        logger.info(f">>>>>>> testing: {setting} <<<<<<<<<<<<<<<<<<<<<<")
-        exp.test(setting)
+        logger.info(f">>>>>>> testing: {cfg.model_id}, {cfg.pred_len} <<<<<<<<<<<<<<<<<<<<<<")
+        exp.test()
 
         if cfg.get("do_predict", False):
-            logger.info(f">>>>>>> predicting: {setting} <<<<<<<<<<<<<<<<<<<<<<")
-            exp.predict(setting, True)
+            logger.info(f">>>>>>> predicting: {cfg.model_id}, {cfg.pred_len} <<<<<<<<<<<<<<<<<<<<<<")
+            exp.predict(True)
 
         torch.cuda.empty_cache()
 

@@ -84,7 +84,8 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         self.model.train()
         return total_loss
 
-    def train(self, setting):
+    def train(self):
+        setting = os.path.join(self.args.model_id, self.args.model_number)
         train_data, train_loader = self._get_data(flag="train")
         vali_data, vali_loader = self._get_data(flag="val")
 
@@ -179,16 +180,17 @@ class Exp_Long_Term_Forecast(Exp_Basic):
 
         return self.model
 
-    def test(self, setting, test=0):
+    def test(self, test=0):
+        setting = os.path.join(self.args.model_id, self.args.model_number)
         test_data, test_loader = self._get_data(flag="test")
         if test:
             logger.info("Loading model...")
             self.model.load_state_dict(
-                torch.load(os.path.join("./checkpoints/" + setting, "checkpoint.pth"))
+                torch.load(os.path.join("./checkpoints", setting, "checkpoint.pth"))
             )
 
-        folder_path = f"./test_results/{setting}/"
-        weights_folder = f"./test_results/{setting}/weights/"  # Folder for weights
+        folder_path = os.path.join(".", "test_results", setting)
+        weights_folder = os.path.join(folder_path, "weights")  # Folder for weights
         os.makedirs(folder_path, exist_ok=True)
         os.makedirs(weights_folder, exist_ok=True)  # Create weights subfolder
 
@@ -279,8 +281,10 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         # Save final results
         # with open(f'result_long_term_forecast_{self.args.comment}.txt', 'a') as f:
         with open(f"result_long_term_forecast_{self.args.model_id}.txt", "a") as f:
-            f.write(f"{setting}\n")
-            f.write(f"mse: {avg_mse}, mae: {avg_mae}\n\n")
+            args_dict = dict(self.args)
+            args_dict['mse'] = avg_mse
+            args_dict['mae'] = avg_mae
+            f.write(f"{args_dict}\n")
 
         results_folder = f"./results/{setting}/"
         os.makedirs(results_folder, exist_ok=True)
@@ -291,7 +295,8 @@ class Exp_Long_Term_Forecast(Exp_Basic):
 
         return
 
-    def predict(self, setting, load=False):
+    def predict(self, load=False):
+        setting = os.path.join(self.args.model_id, self.args.model_number)
         pred_data, pred_loader = self._get_data(flag="pred")
 
         if load:
