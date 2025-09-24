@@ -3,7 +3,7 @@
 ### Welcome to the official repository of [ParallelTime: Dynamically Weighting the Balance of Short- and Long-Term Temporal Dependencies](https://www.arxiv.org/abs/2507.13998). 
 ### The architecture of ParallelTime. 
 
-<img src="figures/model-architucture.png" alt="ParallelTime Architucture" width="100%">
+<img src="figures/model-architucture.png" alt="ParallelTime Architucture" width="80%">
 
 ### Our main contributions:
 * ParallelTime (Parallel Time) selects the contributions of short-term, long-term, and global memory for each time series patch.
@@ -11,7 +11,7 @@
 approach for long-term time series forecasting.
 * Our model, ParallelTime, achieves SOTA performance on real-world benchmarks, delivering better results from previews models with fewer parameters and lower computational cost, critical for real-time forecasting.
 ## Results
-<img src="figures/results.png" alt="ParallelTime Architucture" width="100%">
+<img src="figures/results.png" alt="ParallelTime Architucture" width="90%">
 
 
 ## Usage of Parallel Time
