@@ -11,7 +11,7 @@
 approach for long-term time series forecasting.
 * Our model, ParallelTime, achieves SOTA performance on real-world benchmarks, delivering better results from previews models with fewer parameters and lower computational cost, critical for real-time forecasting.
 ## Results
-<img src="figures/results.png" alt="ParallelTime Architucture" width="90%">
+<img src="figures/results.png" alt="ParallelTime Architucture" width="100%">
 
 
 ## Usage of Parallel Time
