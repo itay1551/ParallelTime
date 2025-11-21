@@ -349,6 +349,7 @@ class Model(nn.Module):
             )
         else:
             registers = None
+        
         attention_mask = WindowAttMaskWithRegister(self.num_patches, self.patches_window_len, 
                                                    x.device, self.n_registers)
         
