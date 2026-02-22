@@ -53,5 +53,18 @@ We are deeply grateful for the valuable code and efforts contributed by the foll
 - https://github.com/thuml/iTransformer
 - https://github.com/yuqinie98/PatchTST
 
+## Cite ParallelTime
+If ParallelTime or this repository is useful in your own research, you can use the following BibTeX entry:
+```
+@misc{katav2025paralleltimedynamicallyweightingbalance,
+      title={ParallelTime: Dynamically Weighting the Balance of Short- and Long-Term Temporal Dependencies}, 
+      author={Itay Katav and Aryeh Kontorovich},
+      year={2025},
+      eprint={2507.13998},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2507.13998}, 
+}
+```
 ## Contact
 If you have any questions or concerns, please contact us or submit an issue
